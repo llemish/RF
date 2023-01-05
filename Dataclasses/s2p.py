@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from matplotlib import pyplot
 import seaborn as sns
+from scipy.interpolate import interp1d
 
 from frequency import Frequency
 
@@ -304,6 +305,23 @@ class S2P:
                 ax.set_title(params[0])
         plt.show()
 
+    def plot2(self, s_params):
+        sns.set_theme()
+        x = self.freq.freqs
+        for s_param in s_params:
+            ax = plt.subplot()
+            y = self._fmatrix[s_param]
+            if len(x) < 1001:
+                x_full = np.linspace(np.min(x), np.max(x), 1001)
+                y_full = interp1d(x, y, kind='cubic')(x_full)
+            else:
+                x_full = x
+                y_full = x
+            sns.lineplot(x=x_full, y=y_full, ax=ax)
+            sns.scatterplot(x=x, y=y, ax=ax)
+            ax.set_title(s_param)
+            plt.show()
+
 
 
 
@@ -315,5 +333,6 @@ x = pd.read_csv('s2p_example.csv')
 a = S2P()
 a.from_dataframe(x, freq_suffix='GHz')
 # a.format = 'RI'
-a.plot(['S11', 'S12', 'S21', 'S22'])
-print(a.S21)
+# a.plot(['S11', 'S12', 'S21', 'S22'])
+a.plot2(['S11_Mag', 'S21_Mag', 'S21_Phase', 'S12_Mag', 'S12_Phase'])
+# print(a.S21)
