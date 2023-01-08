@@ -17,15 +17,15 @@ class Frequency:
         _freq_stop - the highest freq of range
         _nop - number of points
         _w - boolean, True, if you use cyclic freq
-
+        _log_freq - True if using logarithmic frequency, default False
         _ratio - numeric ration for calculating using suffix
     """
 
     def __init__(self, freqs=None, suffix='Hz', freq_start=None,
-                 freq_stop=None, nop=None, w=False):
-        self._suffix = suffix
-        self._ratio = self._init_ratio(suffix)
-        self._w = w
+                 freq_stop=None, nop=None, w=False, log_freq=False):
+        self.suffix = suffix
+        self.w = w
+        self.log_freq = log_freq
 
         if freqs is not None:
             freqs = np.asarray(freqs, dtype=float)
@@ -55,7 +55,8 @@ class Frequency:
     def w2f(self, w):
         return w / (2 * np.pi)
 
-    def _init_ratio(self, suffix):
+    def _init_ratio(self):
+        suffix = self.suffix
         if suffix == 'THz':
             ratio = 10 ** 12
         elif suffix == 'GHz':
@@ -77,8 +78,8 @@ class Frequency:
     @suffix.setter
     def suffix(self, value):
         if value in {'THz', 'GHz', 'MHz', 'kHz', 'Hz', 'mHz'}:
-            self._ratio = self._init_ratio(value)
             self._suffix = value
+            self._ratio = self._init_ratio()
         else:
             raise ValueError("suffix must be one of {THz, GHz, MHz, kHz, Hz, mHz}")
 
@@ -118,6 +119,17 @@ class Frequency:
     @property
     def nop(self):
         return self._nop
+
+    @property
+    def log_freq(self):
+        return self._log_freq
+
+    @log_freq.setter
+    def log_freq(self, value):
+        if isinstance(value, bool):
+            self._log_freq=value
+        else:
+            raise TypeError('log_freq must be boolean')
 
 
 # # fr = Frequency(freqs=[1, 2, 3, 4, 5], suffix='GHz')

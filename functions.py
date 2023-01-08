@@ -1,9 +1,5 @@
 import numpy as np
-import pandas as pd
-from matplotlib import pyplot
-import seaborn as sns
 
-from Dataclasses.frequency import Frequency
 from Dataclasses.s2p import S2P
 
 

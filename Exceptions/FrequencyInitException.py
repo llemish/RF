@@ -23,4 +23,4 @@ class FrequencyInitError(Exception):
         else:
             message = 'Neither frequencies nor freq range ware given'
 
-        super(FrequencyInitException, self).__init__(message)
+        super(FrequencyInitError, self).__init__(message)

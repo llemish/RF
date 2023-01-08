@@ -1,11 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from matplotlib import pyplot
 import seaborn as sns
 from scipy.interpolate import interp1d
 
-from frequency import Frequency
+from Dataclasses.sweep.frequency import Frequency
 
 
 class S2P:
@@ -37,25 +36,20 @@ class S2P:
 
     _NAMES = ['freq', 'S11', 'S12', 'S21', 'S22']
 
-    def __init__(self, nop=None):
+    def __init__(self, format='DB', degree=True, freq_suffix='Hz', sweep_type='freq',
+                 pow_unit='dBm'):
 
         self._matrix = None
         self._fmatrix = None
-        self._format = 'DB'
-        self._degree = True
-        self._suffix = 'Hz'
-
-        if nop is not None:
-            self._matrix = self._init_empty_matrix(nop)
+        self.format = format
+        self.degree = degree
+        self.suffix = freq_suffix
+        self.sweep_type = sweep_type
+        self.pow_unit = pow_unit
 
     def __str__(self):
         text = 'S2P Object'
         return text
-
-    def _init_empty_matrix(self, nop):
-        data_dict = {name: np.empty(nop, dtype=np.cfloat) for name in self._NAMES}
-        matrix = pd.DataFrame.from_dict(data_dict)
-        return matrix
 
     @property
     def format(self):
@@ -65,7 +59,8 @@ class S2P:
     def format(self, value):
         if value in {'RI', 'MA', 'DB'}:
             self._format = value
-            self._init_fmatrix()
+            if self._matrix is not None:
+                self._init_fmatrix()
         else:
             raise ValueError('Format must be one of RI, MA or DB')
 
@@ -79,6 +74,28 @@ class S2P:
             self._degree = value
         else:
             raise TypeError('Degree parameter must be bool')
+
+    @property
+    def sweep_type(self):
+        return self._sweep_type
+
+    @sweep_type.setter
+    def sweep_type(self, value):
+        if value in {'freq', 'pow', 'time'}:
+            self._sweep_type = value
+        else:
+            raise ValueError("Sweep type must be one of {'freq', 'pow', 'time'}")
+
+    @property
+    def pow_unit(self):
+        return self._pow_unit
+
+    @pow_unit.setter
+    def pow_unit(self, value):
+        if value in {'dBm', 'W'}:
+            self._pow_unit=value
+        else:
+            raise ValueError("Power unit must be one of {'dBm', 'W'}")
 
     @property
     def S11(self):
@@ -305,18 +322,18 @@ class S2P:
                 ax.set_title(params[0])
         plt.show()
 
-    def plot2(self, s_params):
+    def plot2(self, s_params, interpol=False):
         sns.set_theme()
         x = self.freq.freqs
         for s_param in s_params:
             ax = plt.subplot()
             y = self._fmatrix[s_param]
-            if len(x) < 1001:
+            if len(x) < 1001 and interpol:
                 x_full = np.linspace(np.min(x), np.max(x), 1001)
                 y_full = interp1d(x, y, kind='cubic')(x_full)
             else:
                 x_full = x
-                y_full = x
+                y_full = y
             sns.lineplot(x=x_full, y=y_full, ax=ax)
             sns.scatterplot(x=x, y=y, ax=ax)
             ax.set_title(s_param)
@@ -334,5 +351,5 @@ a = S2P()
 a.from_dataframe(x, freq_suffix='GHz')
 # a.format = 'RI'
 # a.plot(['S11', 'S12', 'S21', 'S22'])
-a.plot2(['S11_Mag', 'S21_Mag', 'S21_Phase', 'S12_Mag', 'S12_Phase'])
+a.plot2(['S11_Mag', 'S21_Mag', 'S21_Phase', 'S12_Mag', 'S12_Phase'], interpol=True)
 # print(a.S21)
