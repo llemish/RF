@@ -1,7 +1,6 @@
-def alala(x, **kwargs):
-    if 'ololo' in kwargs:
-        x += kwargs['ololo']
-    return x
+class A:
 
+    def __init__(self):
+        self._name = None
+        self._age = 20
 
-print(alala(1, ololo=2))
