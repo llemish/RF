@@ -1,1 +1,2 @@
-print('alala')
+def funct(filename):
+    pass
